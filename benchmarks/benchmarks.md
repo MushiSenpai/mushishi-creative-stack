@@ -1,0 +1,34 @@
+# Creative Stack — Benchmarks
+
+> Rendered from `benchmarks.csv` (source of truth) on 2026-05-29. Do not hand-edit this file — edit the CSV.
+
+**Platform:** RTX 5090 (Blackwell SM_120), Ubuntu 24.04, CUDA 13.2. All runs local, $0 marginal compute beyond electricity.
+
+
+**Coverage:** 0/15 workflows benchmarked.
+
+
+## Pending (awaiting a real run)
+
+| Workflow | Model | Input | Output | Wall (s) | Peak VRAM (GB) | Throughput | Concurrent vLLM | Marginal $ | Cloud-equiv $ | Date | Notes | Sample |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Flashfire | flux-2-klein-4b-fp8 (distilled) | prompt-only, 4 steps, CFG 1.0, seed 42 | 1024x1024 PNG |  |  | sec/image | n |  |  |  | seed-locked identity pass |  |
+| Goldsmith | flux-2-klein-base-4b-fp8 | prompt-only, 20 steps, FluxGuidance 3.5, euler/simple | 1024x1024 PNG |  |  | sec/image | n |  |  |  | base-model keyframe quality |  |
+| Silkmotion | RIFE (frame-interpolation) | 30fps clip in | 60fps clip out (rife x2) |  |  | fps | n |  |  |  | interpolation pass |  |
+| Crystalforge | seedvr2_ema_7b_fp16 (v2.5) | 720p in, blocks_to_swap 32, batch 1 | 720->1080->2160 |  |  | sec/frame | n |  |  |  | 4K upscale confirmed |  |
+| Vanisher | VOID pass1+pass2 + SAM3 + cogvideox_vae | SAM3 mask prompt + fill prompt, pass2 on | object+reflection removed |  |  | sec/frame | n |  |  |  | edit tier |  |
+| Shapeshifter | wan2.1_vace_14B_fp16 | SAM3 mask -> input_masks, masked inpaint | masked region replaced |  |  | sec/frame | n |  |  |  | mask-confined edit |  |
+| Wan22_I2V | wan2.2 14B fp8 (high+low MoE) | FLUX keyframe + prompt, two-sampler, seed 42 | 720p / 25f MP4 |  |  | sec/frame | y |  |  |  | two-sampler MoE fix confirmed |  |
+| Wan22_T2V | wan2.2 14B fp8 (high+low MoE) | prompt-only, two-sampler, seed 42 | 720p / 25f MP4 |  |  | sec/frame | y |  |  |  |  |  |
+| Hunyuan_I2V | hunyuanvideo 1.5 (distilled) | keyframe + prompt, CFG 1.0, flow_shift 5.0 | video MP4 |  |  | sec/frame | n |  |  |  |  |  |
+| Hunyuan_T2V | hunyuanvideo 1.5 | prompt-only | video MP4 |  |  | sec/frame | n |  |  |  |  |  |
+| WanDraft | wan2.1 1.3B | prompt-only draft | low-res preview MP4 |  |  | sec/frame | n |  |  |  | fast iteration draft |  |
+| FluxCommercial | flux1-dev | prompt-only commercial | high-res PNG |  |  | sec/image | n |  |  |  | DO-NOT-TOUCH baseline |  |
+| DailyPipeline | Dolphin/LLM -> FLUX -> Wan22 I2V | text brief -> keyframe -> video | keyframe PNG + final MP4 |  |  | end-to-end sec | y |  |  |  | full pipeline |  |
+| VideoWithMusic | FLUX -> Wan22 I2V -> ACE-Step | text brief -> video + music | final MP4 w/ audio |  |  | end-to-end sec | y |  |  |  | Tier 6 end-to-end |  |
+| Tier6_Finishing | RIFE -> SeedVR2 | 30fps 720p clip | 60fps 2160p clip |  |  | end-to-end sec | n |  |  |  | 4K60 viability test |  |
+
+
+## Why these columns
+
+Each row is the evidence for one capability claim. The pairing that signals systems work, not just output: model + resolution/frames + wall-clock + peak VRAM + concurrency with the LLM + marginal cost vs cloud-equivalent.
