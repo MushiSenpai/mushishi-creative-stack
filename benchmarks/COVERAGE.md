@@ -8,32 +8,35 @@ capability* is — "this produces X in Y seconds at Z GB" is itself the proof.
 Hardware: RTX 5090 32GB · Ryzen 9 9900X3D · 128GB DDR5 · Ubuntu 24.04 · CUDA 13.2.
 All numbers are on-box measurements, indicative not guaranteed.
 
-## ✅ Measured — real numbers committed
+## ✅ Measured — real numbers committed (sweep 2026-06-13)
 
 | Workflow | Tier | Result | Verdict |
 |---|---|---|---|
-| **Vanisher** (VOID object removal) | 4.5 edit | 149–189s, ~27GB, 6s clip | **Clean on representative footage (E1d)**; ghost only on worst-case low-light/occluded clips |
-| **Crystalforge** (SeedVR2 4K) | 6 finish | 586s, 25.7GB, 672×384→1890×1080 | Clean upscale, no artifacts |
-| Avatar chain (clone→TTS→LatentSync) | audio | TTS 25s + lipsync 280s | Gross sync correct; lip-interior artifacts at full-frame (social-OK) |
-| YuE music | audio | 2m56s, ~16GB, 15s song | Works; mono vocoder limit |
+| **Goldsmith** (FLUX.2 4B keyframe) | 2 | 6s, 11.2GB, 1024² | clean |
+| **Wan 2.2 T2V** (two-sampler MoE) | 2 | 483s, 20GB, 720p 81fr | clean; confirms ~497s est |
+| **Wan 2.2 I2V** (keyframe animation) | 2 | 502s, 20GB, 720p 81fr | clean; confirms ~506s est |
+| **Silkmotion** (RIFE interpolation) | 6 | 12s, 3.5GB, →60fps | clean; confirms ~8.3s |
+| **Shapeshifter** (Wan2.1 VACE + SAM3 video) | 4.5 | 802s, 20.6GB | clean; SAM3-video mask works |
+| **Vanisher** (VOID removal) | 4.5 | 149-189s, 27GB | clean on representative footage (E1d) |
+| **Crystalforge** (SeedVR2 4K) | 6 | 586s, 25.7GB | clean upscale |
+| Nemotron LLM | — | 276 tok/s sustained, knee@8 concurrent (728 agg) | stress-tested 2026-06-13 |
+| Avatar / YuE audio | audio | see audio repo | partial/measured |
 
-## 🟡 Built + tested, NOT yet benchmarked — the sweep backlog
+## ❌ DRIFTED — broke from ComfyUI upstream changes (sweep 2026-06-13)
 
-These are confirmed working (per the v1.4 catalogue) but have no committed
-numbers. **Highest-value cheap win: one render each, record, commit.** Catalogue
-gives indicative figures (italic) to confirm against.
+The sweep's big finding: 4 of 9 "tested weeks ago" workflows no longer run.
+"Tested-and-working" has a shelf life without pinned node versions.
 
-| Workflow | Tier | Indicative | Why it matters |
-|---|---|---|---|
-| **Goldsmith** (FLUX.2 4B base keyframe) | 2 | *~3.3s, 9GB, 1024²* | The keyframe that anchors every generated shot |
-| **Wan 2.2 T2V** (two-sampler MoE) | 2 | *~497s, 81fr, 720p* | Primary text→video; the days-long crystalline-bug fix lives here |
-| **Wan 2.2 I2V** | 2 | *~506s, 81fr* | Animate a Goldsmith keyframe |
-| **HunyuanVideo 1.5 T2V** fp16 | 3 | *~8–12min, 720p* | Cinema-grade hero clips |
-| **HunyuanVideo 1.5 I2V** fp8 | 3 | *65fr, 720p, LLM-concurrent* | Cinema keyframe animation |
-| **Silkmotion** (RIFE 60fps) | 6 | *~8.3s* | Fluid-motion finishing pass |
-| **Shapeshifter** (Wan 2.1 VACE edit) | 4.5 | *~14GB* | Masked object/clothing swap, reframe — SAM3-video-mask fix lives here |
-| **Wan 2.1 1.3B draft** | 1 | *~4min, 480p* | Cheap motion test before 14B commit |
-| **FLUX.1 Dev** (Apache-2.0 commercial) | 2 | *~15s, 1024²* | License-clean client stills |
+| Workflow | Failure |
+|---|---|
+| FLUX.1 Dev commercial | `ModelSamplingFlux.patch()` unexpected kwarg — node API changed |
+| Wan 2.1 draft | `Node 'Video Latent' has no class_type` — custom node renamed/removed |
+| HunyuanVideo 1.5 T2V | 4 nodes missing class_type |
+| HunyuanVideo 1.5 I2V | 5 nodes missing class_type |
+
+**To-do:** re-validate/rebuild the 4 drifted workflows; pin custom-node versions.
+Technique that found it fast: `app.graphToPrompt()` headlessly validates node
+availability without rendering — run it across the whole library periodically.
 
 ## ⬜ Defined but not built / parked
 
