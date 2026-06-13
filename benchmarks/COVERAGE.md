@@ -61,3 +61,20 @@ diffusion hallucination) and its most valuable untested path. → **E4.**
 2. **E4** — forensic bridge end-to-end (the differentiator)
 3. **E1e** — Shapeshifter with the SAM3 video mask (same fix as E1c, now available)
 4. Parked items only if a concrete client need appears
+
+## Drift repair investigation (2026-06-14) — diagnosed, NOT blind-fixed
+
+Investigated each drifted workflow for a safe fix. Verdict: none are quick edits.
+- **FLUX.1 Dev**: ModelSamplingFlux inputs UNCHANGED, but its internal `.patch()`
+  signature changed in ComfyUI core → needs a ComfyUI/node version fix, not a
+  workflow edit.
+- **Wan 2.1 draft / Hunyuan T2V+I2V**: nodes RENAMED with different I/O
+  (HunyuanVideoModelLoader→HunyuanVideo15*, EmptyWanLatentVideo→Wan22ImageToVideoLatent)
+  → each needs the graph rebuilt against the new nodes + visual QA.
+- **FLUX-NSFW image**: dangling CLIP link from the deleted enhanceaiteam LoRA
+  → rebuild on Chroma 8.9B (the noted replacement) or retire.
+
+DECISION: not shipping blind rebuilds (could pass validation but render garbage —
+exactly what the brand promises it won't do). These need a focused rebuild
+session with frame-by-frame QA. Tracked as ⚠️ in the catalogue until then. The
+5 working workflows + Vanisher + Crystalforge cover the deliverable pipeline.
