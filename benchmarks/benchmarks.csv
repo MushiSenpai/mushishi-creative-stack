@@ -14,3 +14,6 @@ FluxCommercial,flux1-dev,prompt-only commercial,high-res PNG,,,sec/image,n,,,,DR
 DailyPipeline,Dolphin/LLM -> FLUX -> Wan22 I2V,text brief -> keyframe -> video,keyframe PNG + final MP4,,,end-to-end sec,y,,,,full pipeline,
 VideoWithMusic,FLUX -> Wan22 I2V -> ACE-Step,text brief -> video + music,final MP4 w/ audio,,,end-to-end sec,y,,,,Tier 6 end-to-end,
 Tier6_Finishing,RIFE -> SeedVR2,30fps 720p clip,60fps 2160p clip,,,end-to-end sec,n,,,,4K60 viability test,
+dreamforge,hunyuanvideo1.5_720p_t2v_fp16,"T2V prompt-only, 512x512, 25 frames",512x512 mp4,16,,sec/video,n,,,2026-06-15,render-verified — paper airplane over city,dreamforge_f0.png
+quickening,hunyuanvideo1.5_720p_i2v_cfg_distilled_fp8,"I2V from image, 512x512, 25 frames",512x512 mp4,21,,sec/video,n,,,2026-06-15,render-verified — image animated,quickening_f0.png
+sharpscale,hunyuanvideo1.5_1080p_sr_distilled_fp8,"384 base → 1080p super-res",1920x1072 mp4,73,,sec/video,n,,,2026-06-15,render-verified — true 1080p upscale,sharpscale_f8.png
