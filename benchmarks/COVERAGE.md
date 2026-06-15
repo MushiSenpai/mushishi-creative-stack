@@ -20,9 +20,9 @@ All numbers are on-box measurements, indicative not guaranteed.
 | **Vanisher** (VOID removal) | 4.5 | 149-189s, 27GB | clean on representative footage (E1d) |
 | **Crystalforge** (SeedVR2 4K) | 6 | 586s, 25.7GB | clean upscale |
 | **dreamforge / quickening / sharpscale** (Hunyuan 1.5 T2V/I2V/SR) | 3 | 16s / 21s / 73s | render-verified 2026-06-15 |
-| **Maestro** (idea → cinematic clip + score) | 7 | 787s, ~18GB | end-to-end pipeline, render-verified 2026-06-15 |
+| **Maestro** (idea → cinematic clip + score) | 7 | 512s, ~18GB | end-to-end, render-verified 2026-06-15; clips are 3.375s (Wan I2V frame cap) |
 | Nemotron LLM | — | 276 tok/s sustained, knee@8 concurrent (728 agg) | stress-tested 2026-06-13 |
-| Avatar / YuE audio | audio | YuE 7B: real 30s score in ~280s | used by Maestro pipeline |
+| Score (ACE-Step) | audio | ACE-Step 3.5B: 20s instrumental score in ~8s | used by Maestro pipeline |
 
 ## ⟳ DRIFT — found 2026-06-13, REBUILT + render-verified 2026-06-15
 
@@ -78,8 +78,8 @@ Investigated each drifted workflow for a safe fix. Verdict: none are quick edits
 - **Wan 2.1 draft / Hunyuan T2V+I2V**: nodes RENAMED with different I/O
   (HunyuanVideoModelLoader→HunyuanVideo15*, EmptyWanLatentVideo→Wan22ImageToVideoLatent)
   → each needs the graph rebuilt against the new nodes + visual QA.
-- **FLUX image**: dangling CLIP link from the deleted enhanceaiteam LoRA
-  → rebuild on Chroma 8.9B (the noted replacement) or retire.
+- **A drifted FLUX image workflow**: dangling CLIP link from a deleted community LoRA
+  → rebuild on Chroma or retire.
 
 DECISION: not shipping blind rebuilds (could pass validation but render garbage —
 exactly what the brand promises it won't do). These need a focused rebuild

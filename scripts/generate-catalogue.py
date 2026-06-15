@@ -51,10 +51,10 @@ META = {
  "Shapeshifter": dict(name="Shapeshifter", tier="45", emoji="🦎", model="Wan 2.1 VACE + SAM3",
     inp="Video + masked region", out="Video, region swapped/reframed", purpose="Swap or reframe a masked region.",
     diff="VACE — replaces/reframes content inside a mask (vs Vanisher which only erases). For client edits that change a region, not delete it."),
- "maestro":      dict(name="Maestro", tier="7", emoji="🎬", model="PRISM(:8001) → FLUX.2 → Wan 2.2 I2V MoE → YuE 7B",
+ "maestro":      dict(name="Maestro", tier="7", emoji="🎬", model="PRISM(:8001) → FLUX.2 → Wan 2.2 I2V MoE → ACE-Step",
     inp="One-line scene idea", out="832×480 cinematic clip + original 30s score",
     purpose="One sentence → a finished, scored cinematic clip — fully automated, 100% local.",
-    diff="The end-to-end sovereign pipeline: a local LLM writes the prompts, FLUX paints the keyframe, Wan animates it, YuE composes the score — one command, no cloud, no manual stitching."),
+    diff="The end-to-end sovereign pipeline: a local LLM writes the prompts, FLUX paints the keyframe, Wan animates it, ACE-Step composes the score — one command, no cloud, no manual stitching."),
 }
 
 def load_bench():
