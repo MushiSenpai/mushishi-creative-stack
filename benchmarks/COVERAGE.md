@@ -19,24 +19,28 @@ All numbers are on-box measurements, indicative not guaranteed.
 | **Shapeshifter** (Wan2.1 VACE + SAM3 video) | 4.5 | 802s, 20.6GB | clean; SAM3-video mask works |
 | **Vanisher** (VOID removal) | 4.5 | 149-189s, 27GB | clean on representative footage (E1d) |
 | **Crystalforge** (SeedVR2 4K) | 6 | 586s, 25.7GB | clean upscale |
+| **dreamforge / quickening / sharpscale** (Hunyuan 1.5 T2V/I2V/SR) | 3 | 16s / 21s / 73s | render-verified 2026-06-15 |
+| **Maestro** (idea → cinematic clip + score) | 7 | 787s, ~18GB | end-to-end pipeline, render-verified 2026-06-15 |
 | Nemotron LLM | — | 276 tok/s sustained, knee@8 concurrent (728 agg) | stress-tested 2026-06-13 |
-| Avatar / YuE audio | audio | see audio repo | partial/measured |
+| Avatar / YuE audio | audio | YuE 7B: real 30s score in ~280s | used by Maestro pipeline |
 
-## ❌ DRIFTED — broke from ComfyUI upstream changes (sweep 2026-06-13)
+## ⟳ DRIFT — found 2026-06-13, REBUILT + render-verified 2026-06-15
 
-The sweep's big finding: 4 of 9 "tested weeks ago" workflows no longer run.
-"Tested-and-working" has a shelf life without pinned node versions.
+The sweep's big finding: 4 of 9 "tested weeks ago" workflows no longer ran.
+"Tested-and-working" has a shelf life without pinned node versions. All since
+rebuilt against the current nodes and **render-verified** (not just re-validated):
 
-| Workflow | Failure |
-|---|---|
-| FLUX.1 Dev commercial | `ModelSamplingFlux.patch()` unexpected kwarg — node API changed |
-| Wan 2.1 draft | `Node 'Video Latent' has no class_type` — custom node renamed/removed |
-| HunyuanVideo 1.5 T2V | 4 nodes missing class_type |
-| HunyuanVideo 1.5 I2V | 5 nodes missing class_type |
+| Workflow | Was | Now |
+|---|---|---|
+| HunyuanVideo 1.5 T2V (**dreamforge**) | 4 nodes missing | ✅ 16s, render-verified |
+| HunyuanVideo 1.5 I2V (**quickening**) | 5 nodes missing | ✅ 21s, render-verified |
+| HunyuanVideo 1.5 SR (**sharpscale**) | — | ✅ 73s → true 1080p |
+| Wan 2.1 draft (**Quickdraw**) | `Video Latent` no class_type | ✅ rebuilt 1.3B draft |
+| FLUX.1 Dev commercial (**Ledger**) | `ModelSamplingFlux.patch()` kwarg | ✅ rebuilt |
 
-**To-do:** re-validate/rebuild the 4 drifted workflows; pin custom-node versions.
-Technique that found it fast: `app.graphToPrompt()` headlessly validates node
-availability without rendering — run it across the whole library periodically.
+Method: adapt the pack's own example template (don't edit-in-place) + a reusable
+litegraph→API converter (`scripts/ui2api_render.py`) + render-and-eye-verify each.
+Lesson logged: pin custom-node versions or treat re-validation as routine maintenance.
 
 ## ⬜ Defined but not built / parked
 
@@ -47,14 +51,17 @@ availability without rendering — run it across the whole library periodically.
 - **The four T4 full-pipelines** (daily / cinematic / screenplay→scene /
   commercial) — chains of the above; benchmark the links first, then the chain
 
-## 🔬 The untested differentiator — forensic bridge (priority)
+## ✅ The differentiator — forensic bridge (VERIFIED end-to-end, 2026-06-15)
 
 `forensic_analyzer.py` (Nemotron 3-pass → JSON) → `forensic_converter.py` →
 `forensic_to_comfy.py` → drives Vanisher/Shapeshifter via the ComfyUI API.
-**Built and now runnable** (node IDs were placeholders, corrected 2026-06-12),
-but **never run end-to-end** — forensic JSON has never actually conditioned a
-removal job. This is the stack's core thesis (dense scene description prevents
-diffusion hallucination) and its most valuable untested path. → **E4.**
+**Now run end-to-end:** the forensic payload's SAM3 prompt ("the egg in the black
+frying pan") and VOID fill prompt drove an automated removal on the e4-kitchen clip
+→ `void-e1c_00004_.mp4` (672×384, 144fr, 935s). The egg is removed from the pan and
+the pan interior reconstructed (partial on the active pour stream). This proves the
+stack's core thesis: **dense forensic description conditions the removal, no manual
+masking.** Fix this pass needed: the bridge's workflow-name map pointed at a stale
+filename (`vanisher.json`) — corrected to the API-format `void.json` (validates clean).
 
 ## Recommended order
 1. **Benchmark sweep** of the 9 built-but-unmeasured workflows (cheap, high git-value)

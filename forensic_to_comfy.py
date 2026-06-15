@@ -362,7 +362,8 @@ def main():
             workflow = json.load(f)
         print(f"[comfy] Loaded workflow from: {args.workflow_file}")
     else:
-        wf_name = "vanisher" if args.workflow == "void" else "shapeshifter"
+        # API-format exports: void.json (VOID/Vanisher) / vace.json (VACE/Shapeshifter)
+        wf_name = "void" if args.workflow == "void" else "vace"
         workflow = load_workflow(wf_name)
 
     # Build prompt payload
