@@ -10,7 +10,7 @@ Wan22_T2V,wan2.2 14B fp8 (high+low MoE),prompt-only two-sampler seed 42,720p 81f
 Hunyuan_I2V,hunyuanvideo 1.5 (distilled),"keyframe + prompt, CFG 1.0, flow_shift 5.0",video MP4,,,sec/frame,n,,,,DRIFTED: HunyuanVideo* nodes renamed to HunyuanVideo15* — rebuild,
 Hunyuan_T2V,hunyuanvideo 1.5,prompt-only,video MP4,,,sec/frame,n,,,,DRIFTED: HunyuanVideo* nodes renamed to HunyuanVideo15* — rebuild,
 WanDraft,wan2.1 1.3B,prompt-only draft,low-res preview MP4,70,,sec/frame,n,SGD 0.009,USD 0.080,,render-verified 2026-06-15; Wan2.1 1.3B draft video,
-FluxCommercial,flux1-dev,prompt-only commercial,high-res PNG,20,,sec/image,n,SGD 0.003,USD 0.025,,"render-verified 2026-06-15; FLUX.1-dev rebuilt, was drifted",
+FluxCommercial,flux1-dev,prompt-only commercial,high-res PNG,20,,sec/image,n,SGD 0.003,USD 0.025,,"render-verified 2026-06-15; FLUX.1-dev clean product shot (prev. broken, now rebuilt)",
 DailyPipeline,Dolphin/LLM -> FLUX -> Wan22 I2V,text brief -> keyframe -> video,keyframe PNG + final MP4,,,end-to-end sec,y,,,,full pipeline,
 VideoWithMusic,FLUX -> Wan22 I2V -> ACE-Step,text brief -> video + music,final MP4 w/ audio,,,end-to-end sec,y,,,,Tier 6 end-to-end,
 Tier6_Finishing,RIFE -> SeedVR2,30fps 720p clip,60fps 2160p clip,,,end-to-end sec,n,,,,4K60 viability test,
