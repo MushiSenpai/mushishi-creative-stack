@@ -96,20 +96,20 @@ META = {
     diff="Demucs strips music/noise first (raw samples clone robotic), then Fish Speech builds the profile Narrator reuses. Run once per speaker."),
 
  # ── Lip-sync / Avatar ───────────────────────────────────────────────────────
- "MuseTalk": dict(name="Mouthpiece", src="audio", tier="1", cap="lipsync", emoji="👄", model="MuseTalk",
-    inp="Portrait + audio", out="Talking-head MP4", purpose="Fast draft lip-sync for a portrait.",
-    diff="Fastest lip-sync tier (draft). Currently blocked on a CUDA-13 dependency — moving to its own container. Use Persona (LatentSync) until then."),
+ "MuseTalk": dict(name="Mouthpiece", src="audio", tier="1", cap="lipsync", emoji="👄", model="MuseTalk 1.5",
+    inp="Portrait + audio", out="Talking-head MP4", purpose="Fast lip-sync for a portrait (REBUILD TARGET).",
+    diff="The 2026 #1 open lip-sync model and the rebuild target — blocked on mmcv/cu130, to be rebuilt in a dedicated pinned env (social-grade goal). Local lip-sync tops at social-grade; broadcast-grade = cloud."),
  "LatentSync": dict(name="Persona", src="audio", tier="2", cap="lipsync", emoji="🗣️", model="LatentSync",
-    inp="Portrait + audio", out="H.264 talking-head", purpose="Production talking-head from a portrait.",
-    diff="Production lip-sync — gross sync verified (mouth tracks speech/silence). Lip-interior artifacts at full-frame zoom → social/preview, not broadcast close-up. Draft = Mouthpiece; cinematic = Thespian."),
+    inp="Portrait + audio", out="H.264 talking-head", purpose="Talking-head from a portrait (REBUILD REQUIRED).",
+    diff="Rebuild required — produces structurally corrupt output (mouth melt/seams) in the unified worker. All 3 local lip-sync models need their own pinned env. Local = social-grade; broadcast = cloud."),
  "Hallo2": dict(name="Thespian", src="audio", tier="3", cap="lipsync", emoji="🎭", model="Hallo2",
-    inp="Portrait + audio", out="H.264 MP4 (half-body + expression)", purpose="Cinematic talking-head with expression.",
-    diff="Highest lip-sync tier — half-body + expression. A solo act (~10–12GB, other GPU services must stop). First output verified; wall-clock not yet recorded."),
+    inp="Portrait + audio", out="H.264 MP4 (half-body + expression)", purpose="Cinematic talking-head (REBUILD REQUIRED).",
+    diff="Rebuild required — diffusers API break in the unified worker (worked in its own container before). The strongest local fallback once rebuilt in a pinned env. Broadcast-grade = cloud."),
 
  # ── Music ───────────────────────────────────────────────────────────────────
  "ACEStep": dict(name="Pulse", src="audio", tier="1", cap="music", emoji="🥁", model="ACE-Step 3.5B",
-    inp="Genre / mood text", out="~30s instrumental", purpose="Fast instrumental drafts for scoring.",
-    diff="Fastest music tier — ~8s for a draft score (measured inside Maestro). Quick iteration; step up to Ambience for polish or Anthem for a full song."),
+    inp="Genre / mood text", out="30s stereo 48kHz WAV", purpose="Fast, high-fidelity instrumental beds.",
+    diff="Real stereo 48kHz instrumental in ~10s (1.8s diffusion, ~30× realtime) — higher fidelity than Anthem's mono. Runs in an isolated venv; gateway wiring pending. (Maestro's old 'ACE-Step' score was actually YuE.)"),
  "StableAudio": dict(name="Ambience", src="audio", tier="2", cap="music", emoji="🌌", model="Stable Audio Open 1.0",
     inp="Text prompt", out="Up to 47s audio", purpose="Cinematic / ambient underscore.",
     diff="Production ambient/cinematic beds. Richer than Pulse; instrumental only (no vocals). For songs with lyrics use Anthem."),
@@ -329,7 +329,9 @@ def main():
         '<b>perf pending</b> = built &amp; runs, not yet timed · <b>blocked</b> = a known dependency blocker. '
         'Raw numbers: <a href="https://github.com/MushiSenpai/mushishi-creative-stack/blob/main/benchmarks/benchmarks.csv">creative benchmarks.csv</a> · '
         '<a href="https://github.com/MushiSenpai/mushishi-audio-stack/blob/main/benchmarks/audio-benchmarks.csv">audio benchmarks.csv</a>. '
-        'Scriptwriting throughput from the sovereign-stack stress tests.</div>\n'
+        'Scriptwriting throughput from the sovereign-stack stress tests. '
+        '<b>Lip-sync / avatar:</b> all local models are pending a dedicated-environment rebuild (MuseTalk 1.5 target) — '
+        'local output tops at <b>social-grade</b>; broadcast-grade uses a <b>cloud</b> path.</div>\n'
         + SCRIPT +
         '\n</div></body></html>'
     )
