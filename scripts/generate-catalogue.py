@@ -96,9 +96,9 @@ META = {
     diff="Demucs strips music/noise first (raw samples clone robotic), then Fish Speech builds the profile Narrator reuses. Run once per speaker."),
 
  # ── Lip-sync / Avatar ───────────────────────────────────────────────────────
- "MuseTalk": dict(name="Mouthpiece", src="audio", tier="1", cap="lipsync", emoji="👄", model="MuseTalk 1.5",
-    inp="Portrait + audio", out="Talking-head MP4", purpose="Fast lip-sync for a portrait (REBUILD TARGET).",
-    diff="The 2026 #1 open lip-sync model and the rebuild target — blocked on mmcv/cu130, to be rebuilt in a dedicated pinned env (social-grade goal). Local lip-sync tops at social-grade; broadcast-grade = cloud."),
+ "MuseTalk": dict(name="Mouthpiece", src="audio", tier="1", cap="lipsync", emoji="👄", model="MuseTalk 1.5 (DWPose/rtmlib)",
+    inp="Portrait + audio", out="Talking-head MP4", purpose="Social-grade talking-head from a portrait.",
+    diff="WORKING — runs in its own isolated container; DWPose via rtmlib/ONNX sidesteps the mmcv/cu130 wall. Social-grade: coherent mouth, distinct visemes, no melt (the LatentSync failure). Loads per job, 0 idle VRAM. The other two lipsync tiers stay rebuild-required; broadcast-grade = cloud."),
  "LatentSync": dict(name="Persona", src="audio", tier="2", cap="lipsync", emoji="🗣️", model="LatentSync",
     inp="Portrait + audio", out="H.264 talking-head", purpose="Talking-head from a portrait (REBUILD REQUIRED).",
     diff="Rebuild required — produces structurally corrupt output (mouth melt/seams) in the unified worker. All 3 local lip-sync models need their own pinned env. Local = social-grade; broadcast = cloud."),
@@ -125,14 +125,14 @@ META = {
  # ── Dubbing ─────────────────────────────────────────────────────────────────
  "Dub": dict(name="Polyglot", src="audio", tier="45", cap="dub", emoji="🌐", model="Whisper → Nemotron → Fish Speech",
     inp="Video + target language", out="Dubbed MP4 + SRT", purpose="Dub a video into another language.",
-    diff="Same-language dub works end-to-end (~20s: transcribe → TTS → SRT → mux). Cross-language translation is blocked on worker→LLM networking (the sovereign Nemotron is localhost-bound). video_locked swaps the track; audio_first feeds Wan."),
+    diff="Same-language dub works end-to-end (~20s: transcribe → TTS → SRT → mux). Cross-language routes translation via LiteLLM → local Nemotron; reliable cross-lang needs the GPU Nemotron loaded (the always-on CPU one is too slow for live routing). video_locked swaps the track; audio_first feeds Wan."),
 
  # ── Pipelines (idea → finished deliverable) ─────────────────────────────────
  "maestro": dict(name="Maestro", src="pipeline", tier="7", cap="pipeline", emoji="🎬",
-    model="Scribe → FLUX.2 → Wan 2.2 I2V MoE → ACE-Step", inp="One-line scene idea",
+    model="Scribe → FLUX.2 → Wan 2.2 I2V MoE → YuE", inp="One-line scene idea",
     out="832×480 cinematic clip + original score",
     purpose="One sentence → a finished, scored cinematic clip — fully automated, 100% local.",
-    diff="The end-to-end sovereign pipeline: a local LLM writes the prompts, FLUX paints the keyframe, Wan animates it, ACE-Step composes the score — one command, no cloud, no manual stitching."),
+    diff="The end-to-end sovereign pipeline: a local LLM writes the prompts, FLUX paints the keyframe, Wan animates it, YuE composes the score — one command, no cloud, no manual stitching."),
  "DailyPipeline": dict(name="Daybreak", src="pipeline", tier="7", cap="pipeline", emoji="🌅",
     model="Inkwell/LLM → FLUX.2 → Wan 2.2 I2V", inp="One-line text brief", out="Keyframe PNG + MP4 clip",
     purpose="Text brief → keyframe → animated clip (no score).",
