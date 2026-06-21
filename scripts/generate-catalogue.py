@@ -125,7 +125,7 @@ META = {
  # ── Dubbing ─────────────────────────────────────────────────────────────────
  "Dub": dict(name="Polyglot", src="audio", tier="45", cap="dub", emoji="🌐", model="Whisper → Nemotron → Fish Speech",
     inp="Video + target language", out="Dubbed MP4 + SRT", purpose="Dub a video into another language.",
-    diff="Whisper transcribes → Nemotron translates (duration-aware) → Narrator speaks. video_locked swaps the track; audio_first feeds Wan to regenerate visuals. Quality bench (±0.5s/sentence) queued."),
+    diff="Same-language dub works end-to-end (~20s: transcribe → TTS → SRT → mux). Cross-language translation is blocked on worker→LLM networking (the sovereign Nemotron is localhost-bound). video_locked swaps the track; audio_first feeds Wan."),
 
  # ── Pipelines (idea → finished deliverable) ─────────────────────────────────
  "maestro": dict(name="Maestro", src="pipeline", tier="7", cap="pipeline", emoji="🎬",
