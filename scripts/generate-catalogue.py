@@ -125,7 +125,7 @@ META = {
  # ── Dubbing ─────────────────────────────────────────────────────────────────
  "Dub": dict(name="Polyglot", src="audio", tier="45", cap="dub", emoji="🌐", model="Whisper → Nemotron → Fish Speech",
     inp="Video + target language", out="Dubbed MP4 + SRT", purpose="Dub a video into another language.",
-    diff="Same-language dub works end-to-end (~20s: transcribe → TTS → SRT → mux). Cross-language routes translation via LiteLLM → local Nemotron; reliable cross-lang needs the GPU Nemotron loaded (the always-on CPU one is too slow for live routing). video_locked swaps the track; audio_first feeds Wan."),
+    diff="Same-language dub works end-to-end (~20s: transcribe → TTS → SRT → mux). Cross-language translation is routing-ready (LiteLLM → local GPU Nemotron) but hits a hard 32GB VRAM wall — the 26GB model + Whisper + Fish Speech don't co-fit; it needs a phased VRAM handoff to run locally. video_locked swaps the track; audio_first feeds Wan."),
 
  # ── Pipelines (idea → finished deliverable) ─────────────────────────────────
  "maestro": dict(name="Maestro", src="pipeline", tier="7", cap="pipeline", emoji="🎬",
