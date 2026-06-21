@@ -21,7 +21,7 @@ cuda_verified: "13.2 — confirmed 2026-04-25"
 version: "1.5.1"
 updated: 2026-06-10
 changelog:
-  - "v1.5.1 (2026-06-10): Status patch. KNOWN STALE: the Architecture Overview diagram shows 'Hermes Agent (cloud, always on)' — Hermes has run LOCALLY on mushishi as a systemd service (:8642) since main-stack v1.6/v1.7; the Mac is a thin client over Tailscale. Diagram rewrite pending (EXECUTION-PLAN.md task C1). Also: creative-ctl.sh GIT_BACKUP_REMOTE was a placeholder until 2026-06-10 — workflow git repo now initialized locally (branch main), remote push pending. ComfyUI :8188 LAN exposure to be closed by scripts/harden-docker-firewall.sh (run with sudo). Cross-stack priorities now tracked in ~/Documents/EXECUTION-PLAN.md."
+  - "v1.5.2 (2026-06-22): Architecture Overview diagram FIXED (C1) — Hermes now shown correctly as a LOCAL systemd service (:8642) on mushishi, with the phone/Mac as thin clients over Tailscale (it was wrongly drawn as a cloud agent). Companion ref: mushishi-sovereign-ai-stack v1.7.1. Also: creative-ctl.sh GIT_BACKUP_REMOTE was a placeholder until 2026-06-10 — workflow git repo now initialized locally (branch main), remote push pending. ComfyUI :8188 LAN exposure to be closed by scripts/harden-docker-firewall.sh (run with sudo). Cross-stack priorities now tracked in ~/Documents/EXECUTION-PLAN.md."
   - "v1.5 (2026-06-08): Phases 3-4-5 executed. Forensic bridge built + connected (forensic_analyzer schema-stamped, forensic_converter.py + forensic_to_comfy.py created). NVFP4 FLUX.2 Klein 4B+9B downloaded; t1-flux2-9b-flashfire.json added. RIFE + SeedVR2 v2.5 installed; SeedVR2 weights relocated to /data/ai/02-models/SEEDVR2/ (DiT + VAE). Finishing folders created. MAJOR FIX: Shapeshifter SAM3 was image-mode (single [1,H,W] mask) causing tensor-dimension mismatch with VACE — rebuilt to SAM3 video pipeline (LoadSAM3Model → SAM3VideoSegmentation → SAM3Propagate → SAM3VideoOutput) producing per-frame [N,H,W] masks. SAM3 custom node identified as PozzettiAndrea/ComfyUI-SAM3. VOID confirmed working on real footage (blackboard removed via 'writing board' SAM3 label). RTX VSR + LBM install still pending."
   - "v1.4 (2026-05-28): All six named workflows built + tested (Flashfire, Goldsmith, Silkmotion, Crystalforge, Vanisher, Shapeshifter). Wan 2.2 two-sampler fix confirmed (no crystalline artifact). Docker data-root migrated to /data/ai/docker-data. Four WanVideoWrapper VRAM patches applied + documented. Silkmotion set to 60fps. Added Problems & Solutions Glossary. Confirmed node names + params."
   - "v1.3 (2026-05-24): Added Editing Tier (Tier 4.5 — VOID/VACE/SAM3/relight) for client post-production. Corrected Wan 2.2 I2V to the required two-sampler high→low design. SeedVR2 updated to v2.5 + SageAttention (no NVFP4). NVFP4 FLUX.2 Klein variants added. RTX VSR re-evaluated (no longer playback-only). Wan open-weights ceiling = 2.2 (2.5/2.6 are commercial). Audio = on-demand stage. Web-verified."
@@ -162,8 +162,8 @@ This maps your existing folders to their new roles. Nothing gets deleted — onl
                         INTERNET
                            │
                     ┌──────┴──────┐
-                    │ Hermes Agent │  (cloud, always on)
-                    │  + Your Phone│
+                    │ Your Phone  │  (thin client only)
+                    │   / Mac     │
                     └──────┬──────┘
                            │ Tailscale VPN (encrypted)
                            │
@@ -172,6 +172,10 @@ This maps your existing folders to their new roles. Nothing gets deleted — onl
 │                          │                           │
 │              ┌───────────┴────────────┐              │
 │              │    Tailscale Daemon     │              │
+│              └───────────┬────────────┘              │
+│              ┌───────────┴────────────┐              │
+│              │  Hermes Agent (LOCAL)   │ systemd :8642│
+│              │  always-on on the box   │              │
 │              └───────────┬────────────┘              │
 │                          │                           │
 │         ┌────────────────┼────────────────┐          │
@@ -192,12 +196,14 @@ This maps your existing folders to their new roles. Nothing gets deleted — onl
 └──────────────────────────────────────────────────────┘
 ```
 
-**How Hermes controls your machine:**
-1. You send instruction via phone → Hermes agent (cloud)
-2. Hermes SSH-es into your machine via Tailscale
+**How Hermes controls your machine (Hermes runs LOCALLY on the box — no cloud):**
+1. You send an instruction from your phone/Mac → over Tailscale to the **local** Hermes agent (`:8642`, systemd, always on)
+2. Hermes is already on the machine — it runs commands directly (no inbound SSH, nothing leaves the box)
 3. Hermes runs: `docker compose -f /data/ai/06-configs/creative-stack/docker-compose.yml up -d`
-4. Hermes calls ComfyUI API via Tailscale IP to submit generation jobs
+4. Hermes calls the local ComfyUI API (`:8188`) to submit generation jobs
 5. Hermes retrieves outputs from `/data/ai/08-portfolio/outputs/`
+
+> Hermes has run locally on mushishi as a systemd service since main-stack v1.6/v1.7; the Mac/phone are thin clients over Tailscale. (Diagram corrected 2026-06-22 — EXECUTION-PLAN C1.)
 
 ---
 
