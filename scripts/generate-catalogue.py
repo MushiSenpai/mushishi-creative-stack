@@ -38,7 +38,7 @@ META = {
     model="Dolphin 3.0 R1 Mistral 24B (AWQ)", inp="Logline / premise", out="Screenplay / long-form script",
     purpose="Long-form unrestricted creative scriptwriting.",
     diff="Unrestricted local writer with 96K context (Script Mode) — full screenplays, character bibles, no refusals. Wider creative range than Scribe; slower, needs creative-mode VRAM.",
-    static=dict(speed="~80 tok/s (AWQ INT4, est)", vram="~12–14 GB", thr="96K context", status="pending")),
+    static=dict(speed="106 tok/s single-stream (AWQ INT4, measured)", vram="~12–14 GB weights", thr="32K ctx verified (96K capable)", status="measured")),
 
  # ── Image ─────────────────────────────────────────────────────────────────
  "Flashfire": dict(name="Flashfire", src="creative", tier="1", cap="image", emoji="⚡", model="FLUX.2 4B (distilled)",
@@ -47,9 +47,12 @@ META = {
  "Goldsmith": dict(name="Goldsmith", src="creative", tier="2", cap="image", emoji="🔨", model="FLUX.2 4B (base)",
     inp="Text prompt", out="1024² PNG", purpose="Refined keyframes worth building a shot on.",
     diff="Full-step base model — markedly higher fidelity than Flashfire. The still you animate or deliver."),
- "FluxCommercial": dict(name="Ledger", src="creative", tier="2", cap="image", emoji="⚖️", model="FLUX.1 Dev (Apache-2.0)",
-    inp="Text prompt", out="PNG", purpose="License-clean stills you can sell to clients.",
-    diff="The ONLY image model here under a commercial-safe license (Apache-2.0). Pick it for paid client deliverables."),
+ "QwenImage": dict(name="Sterling", src="creative", tier="2", cap="image", emoji="🏷️", model="Qwen-Image 20B (fp8, Apache-2.0)",
+    inp="Text prompt", out="1024×576 PNG", purpose="License-clean stills you can sell to clients.",
+    diff="The commercial-safe image hero — Apache-2.0, so genuinely fine for paid client work (unlike Ledger). Strong prompt-adherence + native text rendering, and the --mode commercial keyframe default. Pick this for deliverables."),
+ "FluxCommercial": dict(name="Ledger", src="creative", tier="2", cap="image", emoji="⚖️", model="FLUX.1-dev (Non-Commercial)",
+    inp="Text prompt", out="PNG", purpose="Fast FLUX.1-dev stills for personal drafts — NOT for client sale.",
+    diff="Under the FLUX.1 [dev] NON-COMMERCIAL License — fine for personal exploration / fast drafts, prohibited for paid or client work. For commercial deliverables use Sterling (Qwen-Image, Apache-2.0)."),
 
  # ── Video (generate) ────────────────────────────────────────────────────────
  "WanDraft": dict(name="Quickdraw", src="creative", tier="1", cap="video", emoji="✏️", model="Wan 2.1 1.3B",
