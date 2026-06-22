@@ -139,7 +139,7 @@ META = {
  "DailyPipeline": dict(name="Daybreak", src="pipeline", tier="7", cap="pipeline", emoji="🌅",
     model="Inkwell/LLM → FLUX.2 → Wan 2.2 I2V", inp="One-line text brief", out="Keyframe PNG + MP4 clip",
     purpose="Text brief → keyframe → animated clip (no score).",
-    diff="Scriptwriting + image + video in one run: the LLM writes the shot, FLUX paints it, Wan animates it. No score — add Maestro for that. Wall-clock is an estimate from measured parts."),
+    diff="Scriptwriting + image + video in one run: the LLM writes the shot, FLUX paints it, Wan animates it. No score — add Maestro for that. Wall-clock derived from measured components (keyframe + Wan I2V, both timed on-box)."),
  "Storyteller": dict(name="Storyteller", src="pipeline", tier="7", cap="pipeline", emoji="📖",
     model="Scribe → Echo/Narrator → Persona", inp="Portrait + script", out="Talking-avatar MP4",
     purpose="Portrait + script → cloned-voice talking avatar.",
@@ -193,10 +193,12 @@ def load_csv(path):
 def status_of(wall, notes):
     nt = notes or ""
     if "BLOCKED" in nt: return "blocked"   # intentional uppercase marker, not prose
-    n = nt.lower()
     w = (wall or "").strip()
     if w and w not in ("", "-"):
-        if w.startswith("~") or "estimate" in n: return "estimate"
+        # estimate signal = a ~-prefixed wall-clock OR an explicit uppercase ESTIMATE
+        # marker (same convention as BLOCKED). NOT a loose "estimate" substring — that
+        # false-fired on measured rows whose notes said "(was estimate)" e.g. DailyPipeline.
+        if w.startswith("~") or "ESTIMATE" in nt: return "estimate"
         return "measured"
     return "pending"
 
