@@ -1,0 +1,33 @@
+<svg viewBox="0 0 560 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="ft fd">
+<title id="ft">The forensic bridge</title>
+<desc id="fd">A client edit request is turned by a multimodal LLM into a pixel-dense forensic JSON spec, which drives the ComfyUI edit so the diffusion model obeys specifications instead of improvising.</desc>
+<rect x="0" y="0" width="560" height="460" rx="14" fill="#0b0e14"/>
+<defs><marker id="g" markerWidth="10" markerHeight="10" refX="5" refY="7" orient="auto"><path d="M1,1 L5,7 L9,1" fill="none" stroke="#e8a33d" stroke-width="1.6"/></marker></defs>
+<g font-family="ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif">
+  <text x="24" y="34" font-size="15" font-weight="500" fill="#e6e1d7">the forensic bridge — <tspan fill="#e8a33d">specs a diffusion model can't dodge</tspan></text>
+  <rect x="150" y="52" width="260" height="32" rx="16" fill="#1e2430" stroke="#5b6270"/>
+  <text x="280" y="72" font-size="11.5" fill="#8a8f98" text-anchor="middle">client: "remove the rain" · 4k deliverable</text>
+  <g stroke="#e8a33d" stroke-width="1.6" marker-end="url(#g)" fill="none">
+    <path d="M280,84 L280,103"/><path d="M280,168 L280,191"/><path d="M280,252 L280,275"/><path d="M280,336 L280,357"/>
+  </g>
+  <rect x="110" y="104" width="340" height="64" rx="10" fill="#11151f" stroke="#e8a33d"/>
+  <text x="128" y="126" font-size="13"><tspan fill="#e8a33d" font-weight="500">nemotron</tspan><tspan fill="#e6e1d7" font-weight="500"> · multimodal llm</tspan></text>
+  <text x="128" y="144" font-size="11" fill="#8a8f98">forensic_analyzer.py — reads the actual frame</text>
+  <text x="128" y="158" font-size="10" fill="#5b6270">pixel-dense forensic scene description</text>
+  <rect x="110" y="192" width="340" height="60" rx="10" fill="#11151f" stroke="#3a4252"/>
+  <text x="128" y="214" font-size="13" font-weight="500" fill="#e6e1d7">build the constraints</text>
+  <text x="128" y="231" font-size="11" fill="#8a8f98">forensic_converter.py → forensic_to_comfy.py</text>
+  <text x="128" y="244" font-size="10" fill="#5b6270">analysis becomes comfyui workflow params</text>
+  <rect x="110" y="276" width="340" height="60" rx="10" fill="#11151f" stroke="#3a4252"/>
+  <text x="128" y="298" font-size="13"><tspan fill="#e6e1d7" font-weight="500">comfyui edit</tspan><tspan fill="#e8a33d"> via api</tspan></text>
+  <text x="128" y="315" font-size="11" fill="#8a8f98">wan 2.1 vace + sam3 video segmentation</text>
+  <text x="128" y="328" font-size="10" fill="#5b6270">obeys the spec — no improvised shadows</text>
+  <g font-size="10" fill="#8a8f98">
+    <text x="292" y="184">→ forensic.json</text>
+    <text x="292" y="268">→ comfy params (api)</text>
+  </g>
+  <rect x="170" y="358" width="220" height="34" rx="17" fill="#1e2430" stroke="#e8a33d"/>
+  <text x="280" y="380" font-size="12" font-weight="500" fill="#e6e1d7" text-anchor="middle">4k deliverable</text>
+  <text x="24" y="430" font-size="11" fill="#8a8f98">the model gets specifications to obey instead of space to confabulate.</text>
+</g>
+</svg>

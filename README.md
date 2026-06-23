@@ -4,6 +4,8 @@
 
 Companion to the [sovereign AI stack](https://github.com/MushiSenpai/mushishi-sovereign-ai-stack) (the analysis brain) and the [audio stack](https://github.com/MushiSenpai/mushishi-audio-stack) (voice/music/dubbing).
 
+<p align="center"><img src="docs/forensic-bridge.svg" alt="The forensic bridge: a multimodal LLM turns an edit request into a pixel-dense forensic JSON spec that drives the ComfyUI edit, so the diffusion model obeys specifications instead of improvising" width="560"></p>
+
 ---
 
 ## How this was built (read this first)
