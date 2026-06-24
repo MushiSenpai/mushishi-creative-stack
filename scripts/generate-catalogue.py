@@ -17,7 +17,7 @@ Status per tile is derived from the data, never faked:
   blocked   = a known blocker in notes
 
 Part of the monthly workflow-maintenance system — regenerates so nothing goes stale."""
-import csv, html, json, datetime
+import csv, html, json, datetime, sys
 
 CREATIVE_CSV = "/home/mushi/Documents/github-staging/mushishi-creative-stack/benchmarks/benchmarks.csv"
 AUDIO_CSV    = "/home/mushi/Documents/github-staging/mushishi-audio-stack/benchmarks/audio-benchmarks.csv"
@@ -38,7 +38,7 @@ META = {
     model="Dolphin 3.0 R1 Mistral 24B (AWQ)", inp="Logline / premise", out="Screenplay / long-form script",
     purpose="Long-form unrestricted creative scriptwriting.",
     diff="Unrestricted local writer with 96K context (Script Mode) — full screenplays, character bibles, no refusals. Wider creative range than Scribe; slower, needs creative-mode VRAM.",
-    static=dict(speed="106 tok/s single-stream (AWQ INT4, measured)", vram="~12–14 GB weights", thr="32K ctx verified (96K capable)", status="measured")),
+    static=dict(speed="106 tok/s (AWQ INT4)", vram="~12–14 GB", thr="32K ctx · measured 2026-06-22", status="measured")),
 
  # ── Image ─────────────────────────────────────────────────────────────────
  "Flashfire": dict(name="Flashfire", src="creative", tier="1", cap="image", emoji="⚡", model="FLUX.2 4B (distilled)",
@@ -47,12 +47,12 @@ META = {
  "Goldsmith": dict(name="Goldsmith", src="creative", tier="2", cap="image", emoji="🔨", model="FLUX.2 4B (base)",
     inp="Text prompt", out="1024² PNG", purpose="Refined keyframes worth building a shot on.",
     diff="Full-step base model — markedly higher fidelity than Flashfire. The still you animate or deliver."),
- "QwenImage": dict(name="Sterling", src="creative", tier="2", cap="image", emoji="🏷️", model="Qwen-Image 20B (fp8, Apache-2.0)",
-    inp="Text prompt", out="1024×576 PNG", purpose="License-clean stills you can sell to clients.",
-    diff="The commercial-safe image hero — Apache-2.0, so genuinely fine for paid client work (unlike Ledger). Strong prompt-adherence + native text rendering, and the --mode commercial keyframe default. Pick this for deliverables."),
- "FluxCommercial": dict(name="Ledger", src="creative", tier="2", cap="image", emoji="⚖️", model="FLUX.1-dev (Non-Commercial)",
-    inp="Text prompt", out="PNG", purpose="Fast FLUX.1-dev stills for personal drafts — NOT for client sale.",
-    diff="Under the FLUX.1 [dev] NON-COMMERCIAL License — fine for personal exploration / fast drafts, prohibited for paid or client work. For commercial deliverables use Sterling (Qwen-Image, Apache-2.0)."),
+ "QwenImage": dict(name="Sterling", src="creative", tier="2", cap="image", emoji="🪙", model="Qwen-Image 20B (Apache-2.0)",
+    inp="Text prompt", out="PNG", purpose="License-clean commercial image hero.",
+    diff="The genuinely commercial-safe image model — Apache-2.0, OK for paid client deliverables. The `--mode commercial` default (~12s warm, ~28GB peak). Use Sterling for client work; Goldsmith for max-fidelity art stills; Ledger only for non-commercial drafts."),
+ "FluxCommercial": dict(name="Ledger", src="creative", tier="2", cap="image", emoji="⚖️", model="FLUX.1 Dev (non-commercial)",
+    inp="Text prompt", out="PNG", purpose="High-fidelity stills for personal / non-commercial use.",
+    diff="FLUX.1-dev is under a NON-commercial license — excellent quality, but NOT for paid client deliverables. For commercial work use Sterling (Qwen-Image, Apache-2.0). Kept here for non-commercial drafts only."),
 
  # ── Video (generate) ────────────────────────────────────────────────────────
  "WanDraft": dict(name="Quickdraw", src="creative", tier="1", cap="video", emoji="✏️", model="Wan 2.1 1.3B",
@@ -100,14 +100,14 @@ META = {
 
  # ── Lip-sync / Avatar ───────────────────────────────────────────────────────
  "MuseTalk": dict(name="Mouthpiece", src="audio", tier="1", cap="lipsync", emoji="👄", model="MuseTalk 1.5 (DWPose/rtmlib)",
-    inp="Portrait + audio", out="Talking-head MP4", purpose="Social-grade talking-head from a portrait.",
-    diff="WORKING — runs in its own isolated container; DWPose via rtmlib/ONNX sidesteps the mmcv/cu130 wall. Social-grade: coherent mouth, distinct visemes, no melt (the LatentSync failure). Loads per job, 0 idle VRAM. The other two lipsync tiers stay rebuild-required; broadcast-grade = cloud."),
- "LatentSync": dict(name="Persona", src="audio", tier="2", cap="lipsync", emoji="🗣️", model="LatentSync",
-    inp="Portrait + audio", out="H.264 talking-head", purpose="Talking-head from a portrait (REBUILD REQUIRED).",
-    diff="Rebuild required — produces structurally corrupt output (mouth melt/seams) in the unified worker. All 3 local lip-sync models need their own pinned env. Local = social-grade; broadcast = cloud."),
+    inp="Portrait + audio", out="1024² talking-head MP4", purpose="Fast social-grade talking-head from a portrait.",
+    diff="WORKING — its own isolated container; DWPose via rtmlib/ONNX sidesteps the mmcv/cu130 wall. The FAST draft tier: social-grade (coherent mouth, distinct visemes, no melt), 78s for a 34.5s 1024² clip, 0 idle VRAM. Step up to Persona (production naturalism) or Thespian (cinematic motion); broadcast-grade = cloud."),
+ "LatentSync": dict(name="Persona", src="audio", tier="2", cap="lipsync", emoji="🗣️", model="LatentSync 1.6",
+    inp="Portrait + audio", out="1024² MP4 (512 face render)", purpose="Production talking-head — the naturalism tier.",
+    diff="WORKING — dedicated pinned container; pinning diffusers 0.32.2 fixed the 1.5 mouth-melt (it was silent version drift, not the model). The production tier: cleaner lower-face/beard blending than Mouthpiece (no paste-box seam), 512² face render. Slower & heavier (242s for 34.5s, ~20GB) and teeth sharpness ~on par with Mouthpiece — pick it for naturalism, Mouthpiece for speed. Broadcast = cloud."),
  "Hallo2": dict(name="Thespian", src="audio", tier="3", cap="lipsync", emoji="🎭", model="Hallo2",
-    inp="Portrait + audio", out="H.264 MP4 (half-body + expression)", purpose="Cinematic talking-head (REBUILD REQUIRED).",
-    diff="Rebuild required — diffusers API break in the unified worker (worked in its own container before). The strongest local fallback once rebuilt in a pinned env. Broadcast-grade = cloud."),
+    inp="Portrait + audio", out="512² MP4 (head pose + expression)", purpose="Cinematic talking-head — pose + expression.",
+    diff="WORKING — dedicated pinned container (diffusers 0.32.2 + decorator 4.4.2). The cinematic tier: head pose + expression + CodeFormer face enhancement — the motion the portrait engines can't do. Expensive: ~1197s for a 34.5s 512² clip (~15× slower than Mouthpiece), ~13.3GB. For non-headshot / expressive framing. Broadcast-grade = cloud."),
 
  # ── Music ───────────────────────────────────────────────────────────────────
  "ACEStep": dict(name="Pulse", src="audio", tier="1", cap="music", emoji="🥁", model="ACE-Step 3.5B",
@@ -139,12 +139,30 @@ META = {
  "DailyPipeline": dict(name="Daybreak", src="pipeline", tier="7", cap="pipeline", emoji="🌅",
     model="Inkwell/LLM → FLUX.2 → Wan 2.2 I2V", inp="One-line text brief", out="Keyframe PNG + MP4 clip",
     purpose="Text brief → keyframe → animated clip (no score).",
-    diff="Scriptwriting + image + video in one run: the LLM writes the shot, FLUX paints it, Wan animates it. No score — add Maestro for that. Wall-clock derived from measured components (keyframe + Wan I2V, both timed on-box)."),
+    diff="Scriptwriting + image + video in one run: the LLM writes the shot, FLUX paints it, Wan animates it. No score — add Maestro for that. Wall-clock is an estimate from measured parts."),
  "Storyteller": dict(name="Storyteller", src="pipeline", tier="7", cap="pipeline", emoji="📖",
     model="Scribe → Echo/Narrator → Persona", inp="Portrait + script", out="Talking-avatar MP4",
     purpose="Portrait + script → cloned-voice talking avatar.",
     diff="Scriptwriting + voice + lip-sync end-to-end: clone the voice, narrate the script, sync to the face. The audio counterpart to Maestro — ~5min for a 34.5s avatar (E2, partial pass: social/preview tier).",
     static=dict(speed="~305s (TTS 25s + LatentSync 280s)", vram="~6 GB", thr="E2 2026-06-12, partial pass", status="measured")),
+}
+
+# CSV rows that are deliberately NOT catalogue tiles: superseded legacy rows,
+# benchmark/pipeline RUNS, infra/stress tests, and aggregates already represented
+# by a tile. Every CSV workflow must be in META (a tile) OR here — otherwise the
+# reconciliation check in main() flags it, so a newly-added workflow can never be
+# silently dropped. When you add a workflow: put it in META (to show it) or here.
+IGNORE = {
+ "Hunyuan_T2V", "Hunyuan_I2V",   # superseded by dreamforge / quickening (legacy rows)
+ "VideoWithMusic",               # = maestro realized (a measured run of the maestro tile)
+ "CRE-2_CommercialPipeline",     # commercial full-pipeline benchmark run
+ "CRE-3_LongClipChain",          # long-clip chain benchmark run
+ "Tier6_Finishing",              # finishing-tier aggregate estimate (covered by finish tiles)
+ "FaceForward",                  # CRE-4 keyframe-option A/B test, not a model
+ "KeyframeAB_ChromaVsLustify",   # CRE-5 controlled A/B comparison run
+ "Scribe-sustained (B-2)",       # sustained-load stress run of the Scribe tile
+ "agent-mode shakedown (AI-5b)", # infra agent-mode shakedown test
+ "coding-stack (AI-1)",          # the coding LLM stack — infra, not a creative deliverable
 }
 
 TIER_ORDER = [
@@ -192,20 +210,47 @@ def load_csv(path):
 
 def status_of(wall, notes):
     nt = notes or ""
-    if "BLOCKED" in nt: return "blocked"   # intentional uppercase marker, not prose
+    # Explicit UPPERCASE markers in the notes are authoritative and win first.
+    # A row legitimately mentions "estimate"/"measured" in prose — e.g.
+    # "MEASURED 2026-06-22 (was estimate)" — so match the DELIBERATE marker, never
+    # the lowercase word (the bug that downgraded Daybreak). Same discipline the
+    # BLOCKED marker already uses (queue A-8).
+    if "BLOCKED" in nt:  return "blocked"
+    if "MEASURED" in nt: return "measured"
+    if "ESTIMATE" in nt: return "estimate"
+    # No explicit marker → derive from the wall-clock value: a "~"-prefixed time
+    # is an estimate, a concrete time is measured, an empty cell is pending.
     w = (wall or "").strip()
     if w and w not in ("", "-"):
-        # estimate signal = a ~-prefixed wall-clock OR an explicit uppercase ESTIMATE
-        # marker (same convention as BLOCKED). NOT a loose "estimate" substring — that
-        # false-fired on measured rows whose notes said "(was estimate)" e.g. DailyPipeline.
-        if w.startswith("~") or "ESTIMATE" in nt: return "estimate"
-        return "measured"
+        return "estimate" if w.startswith("~") else "measured"
     return "pending"
 
-def main():
+def main(strict=False):
     bench = {}
     bench.update(load_csv(CREATIVE_CSV))
     bench.update(load_csv(AUDIO_CSV))
+
+    # ── Reconciliation: every CSV workflow must be a tile (META) or a known
+    # non-tile run (IGNORE). Anything else is a NEW workflow that would be
+    # silently dropped — flag it loudly; --strict refuses to regenerate so the
+    # monthly job alerts instead of publishing an incomplete catalogue.
+    csv_keys = set(bench)
+    unaccounted = sorted(csv_keys - set(META) - IGNORE)
+    if unaccounted:
+        print("⚠️  UNACCOUNTED workflow(s) in the benchmark CSVs — not in META or IGNORE:",
+              file=sys.stderr)
+        for k in unaccounted:
+            print(f"      - {k}", file=sys.stderr)
+        print("    Classify each in generate-catalogue.py: add to META to show it as a "
+              "tile, or to IGNORE if it's a benchmark-only run.", file=sys.stderr)
+        if strict:
+            print("    --strict: refusing to regenerate an incomplete catalogue.", file=sys.stderr)
+            sys.exit(2)
+    else:
+        print(f"✓ reconciled: {len(csv_keys)} CSV workflows accounted for "
+              f"({len(set(META) & csv_keys)} tiles + {len(IGNORE & csv_keys)} known non-tile runs).",
+              file=sys.stderr)
+
     e = html.escape
     tiles = []
     counts = {"measured":0, "estimate":0, "pending":0, "blocked":0}
@@ -254,6 +299,9 @@ def main():
  *{margin:0;padding:0;box-sizing:border-box}
  body{font-family:system-ui,sans-serif;background:#0b0d10;color:#d8dde2;padding:32px 24px 80px;line-height:1.5}
  .wrap{max-width:1180px;margin:0 auto}
+ .brand{display:inline-block;font-family:ui-monospace,monospace;font-weight:700;font-size:15px;color:#f2f5f8;text-decoration:none;margin-bottom:18px}
+ .brand:hover{color:#e8a33d}
+ .brand .a{color:#e8a33d}
  h1{font-size:28px;font-weight:800;color:#f2f5f8} h1 .a{color:#e8a33d}
  .sub{font-family:ui-monospace,monospace;font-size:12.5px;color:#7d858e;margin:8px 0}
  .status{padding:10px 14px;background:#101e12;border:1px solid #244029;border-radius:9px;margin:14px 0 18px;font-size:13px;color:#86d692}
@@ -316,6 +364,7 @@ def main():
         '<title>Workflow Catalogue — theinvalid.me</title>\n'
         + STYLE +
         '</head><body><div class="wrap">\n'
+        '<a class="brand" href="/">&#8592; theinvalid<span class="a">.me</span></a>\n'
         '<h1>Workflow Catalogue <span class="a">·</span> theinvalid.me</h1>\n'
         '<p class="sub">RTX 5090 32GB · on-box measurements · scriptwriting + creative + audio, one sovereign stack · auto-regenerated by the monthly workflow-maintenance run</p>\n'
         f'<div class="status">{statusline}</div>\n'
@@ -335,7 +384,8 @@ def main():
         'Raw numbers: <a href="https://github.com/MushiSenpai/mushishi-creative-stack/blob/main/benchmarks/benchmarks.csv">creative benchmarks.csv</a> · '
         '<a href="https://github.com/MushiSenpai/mushishi-audio-stack/blob/main/benchmarks/audio-benchmarks.csv">audio benchmarks.csv</a>. '
         'Scriptwriting throughput from the sovereign-stack stress tests. '
-        '<b>Lip-sync / avatar:</b> all local models are pending a dedicated-environment rebuild (MuseTalk 1.5 target) — '
+        '<b>Lip-sync / avatar:</b> all three local engines now run as dedicated pinned services — '
+        'Mouthpiece (MuseTalk, fast draft), Persona (LatentSync 1.6, production naturalism), Thespian (Hallo2, cinematic) — '
         'local output tops at <b>social-grade</b>; broadcast-grade uses a <b>cloud</b> path.</div>\n'
         + SCRIPT +
         '\n</div></body></html>'
@@ -346,4 +396,4 @@ def main():
           f"{counts['pending']} pending, {counts['blocked']} blocked)")
 
 if __name__ == "__main__":
-    main()
+    main(strict="--strict" in sys.argv)
