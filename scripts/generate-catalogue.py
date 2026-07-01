@@ -33,7 +33,7 @@ META = {
     model="Nemotron 3 Nano 30B PRISM", inp="Brief / scene idea", out="Script, shot-prompts, beats",
     purpose="Fast structured scriptwriting + shot-prompt drafting.",
     diff="The sovereign reasoning model (also writes the forensic scene specs). Always-on, fast, structured — for prompts, beats, and JSON the pipeline obeys. For long-form uncensored prose use Inkwell.",
-    static=dict(speed="276 tok/s · knee @ 8 concurrent (728 agg)", vram="~22 GB (agent mode)", thr="stress-tested 2026-06-13", status="measured")),
+    static=dict(speed="276 tok/s · knee @ 8 concurrent (728 agg) · 717 agg sustained @ 8", vram="~22 GB (agent mode)", thr="stress-tested 2026-06-13 · sustained saturation 2026-07-02 (zero throttle)", status="measured")),
  "Inkwell": dict(name="Inkwell", src="script", tier="2", cap="script", emoji="🖋️",
     model="Dolphin 3.0 R1 Mistral 24B (AWQ)", inp="Logline / premise", out="Screenplay / long-form script",
     purpose="Long-form unrestricted creative scriptwriting.",
@@ -161,6 +161,9 @@ IGNORE = {
  "FaceForward",                  # CRE-4 keyframe-option A/B test, not a model
  "KeyframeAB_ChromaVsLustify",   # CRE-5 controlled A/B comparison run
  "Scribe-sustained (B-2)",       # sustained-load stress run of the Scribe tile
+ "Scribe-saturated (B-2)",       # 8-stream sustained saturation run of the Scribe tile (2026-07-02)
+ "CRE-3_ChainVsLoop",            # chain-vs-loop long-clip comparison run (2026-07-02)
+ "CRE-2_CommercialPipeline_Qwen",# commercial-safe (Qwen default) full-pipeline benchmark run (2026-07-02)
  "agent-mode shakedown (AI-5b)", # infra agent-mode shakedown test
  "coding-stack (AI-1)",          # the coding LLM stack — infra, not a creative deliverable
 }

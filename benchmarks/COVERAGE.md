@@ -24,9 +24,10 @@ All numbers are on-box measurements, indicative not guaranteed.
 | **dreamforge / quickening / sharpscale** (Hunyuan 1.5 T2V/I2V/SR) | 3 | 16s / 21s / 73s | render-verified 2026-06-15 |
 | **Maestro** (idea → cinematic clip + score) | 7 | 512s, ~18GB | end-to-end, render-verified 2026-06-15; single segment is 3.375s (Wan I2V frame cap) — for >3.375s see the long-clip chain + drift finding below |
 | **Commercial pipeline (CRE-2)** (FLUX.1-dev 'ledger' kf → Wan I2V → ACE-Step → mux) | 7 | 658s (kf 16s + i2v 510s + music 8s) | measured 2026-06-22; output `commercial_s42_final.mp4` (3.375s). ⚠ keyframe is **non-commercial** FLUX.1-dev — see licence note |
+| **Commercial pipeline — Qwen default (CRE-2 closed)** (Sterling/Qwen-Image kf → Wan I2V → ACE-Step → mux) | 7 | 560s (kf 32s cold + i2v 520s + music 8s), 28.1GB peak | measured 2026-07-02 on the `--mode commercial` **default** — **every link commercially licensed** (Apache-2.0 keyframe); keyframe + last frame eye-verified clean (no melt through I2V). A "Commercial" full-pipeline tile is warranted |
 | **DailyPipeline** (brief → keyframe → video, no score) | 7 | 510–526s | measured 2026-06-22 (was estimate) — derived from the maestro+CRE-2 A+B components |
-| **Long-clip chain (CRE-3)** (3× I2V segment chain) | 7 | 1592s (kf 8s + i2v 1480s + music 8s) | measured 2026-06-22; `maestro_chained.mp4` (10.125s, 243fr @24fps). Clean concat but **visible inter-segment drift** — see verdict below |
-| Nemotron LLM (**Scribe**) | — | 276 tok/s single-stream; knee@8 concurrent (728 agg); sustained 2-stream 437 agg / 218 per-stream, 367W avg @ 61°C, no throttle | concurrency knee 2026-06-13; sustained-load + thermal 2026-06-22 |
+| **Long-clip chain (CRE-3)** (3× I2V segment chain) | 7 | 1592s (kf 8s + i2v 1480s + music 8s) | measured 2026-06-22; `maestro_chained.mp4` (10.125s, 243fr @24fps). Clean concat but **visible inter-segment drift** — see verdict below. **Reproduced + metric-backed + loop-compared 2026-07-02** (chain 1508s vs loop 494s) |
+| Nemotron LLM (**Scribe**) | — | 276 tok/s single-stream; knee@8 concurrent (728 agg); sustained 2-stream 437 agg / 218 per-stream; **sustained 8-stream saturation 717 agg / 89.6 per-stream (240s, 0 errors), 406W avg / 419W peak @ 64–68°C, clocks flat ~2865MHz, zero throttle** | concurrency knee 2026-06-13; sustained 2-stream 2026-06-22; saturation sweep 2026-07-02 — **the knee holds sustained** (98% of burst) |
 | **Inkwell** (Dolphin 3.0 R1 Mistral 24B AWQ) | 2 | 106 tok/s single-stream decode, 32K ctx (63.6K KV) | measured 2026-06-22 (was ~80 est); decode trap fixed |
 | Score (ACE-Step) | audio | ACE-Step 3.5B: 20s instrumental score in ~8s | used by Maestro pipeline |
 
@@ -76,6 +77,26 @@ All numbers are on-box measurements, indicative not guaranteed.
 > **≤2 segments**, or use **loop-mode** for static scenes. This is the measured data
 > behind the single-segment **3.375s cap** caveat in the measured table above.
 
+> **CRE-3 reproduction + chain-vs-loop comparison (2026-07-02):** re-ran the 10s
+> chain at full segment length on a different (misty/ambient) scene and — for the
+> first time — the **loop fallback on the same scene/seed**, with metric-backed QA
+> (`cre3_drift_qa`: per-boundary color/brightness/saturation L1 + a coarse structure
+> MAE). **Chain** (kf 8s + 3×~500s I2V = 1508s): the *seams themselves are clean* —
+> join deltas color_L1 ≤1.5 / struct MAE 0.0027 at both joins, visually a continuous
+> shot — but **cumulative drift compounds monotonically** (last-frame vs anchor:
+> color_L1 7.8 → 12.2 → 14.5; struct MAE 0.028 → 0.030 → 0.032): the subject grows
+> (compounded dolly), the palette saturates/warms, and silhouette detail erodes by
+> segment 3. No catastrophic seam artifact this run (vs 06-22's malformed gull) —
+> ambient scenes are the favorable case. **Loop** (kf 4s + 1×490s I2V + ffmpeg
+> ping-pong fill = 494s, **1/3 the GPU time**): zero drift by construction, the
+> ping-pong turn and restart frames are visually identical — but **motion reverses**
+> (a walking subject moonwalks), so loop only suits static/ambient scenes. **Refined
+> verdict:** >3.375s chaining **is client-usable for gentle/ambient shots up to ~3
+> segments** (drift, not seams, is the limit); keep identity/detail-critical subjects
+> to ≤2 segments; prefer loop-mode for static scenes at a third of the cost. I2V power
+> envelope, measured: 448.7W avg / 451.8W peak (pegged at the 450W cap), 72–76°C, no
+> thermal throttle, 17.9GB VRAM.
+
 > **Licence correction — FLUX.1-dev / 'Ledger' is NON-COMMERCIAL (2026-06-22):** the
 > `FluxCommercial` CSV row and the "FLUX.1 Dev commercial (Ledger)" label previously
 > read as commercial-safe/Apache-2.0. **That is wrong.** FLUX.1 [dev] ships under the
@@ -89,7 +110,9 @@ All numbers are on-box measurements, indicative not guaranteed.
 > artistic alt via explicit `--keyframe chroma`; `ledger`/FLUX.1-dev stays reachable only via
 > explicit `--keyframe ledger` for non-commercial drafts. The CRE-2 commercial-pipeline
 > benchmark uses the `ledger` keyframe to demonstrate the *pipeline shape*, not a
-> commercially-licensed deliverable.
+> commercially-licensed deliverable. **Update 2026-07-02:** the full pipeline has now
+> also been measured on the Qwen default (560s end-to-end, see the measured table) —
+> the commercially-licensed chain is no longer a gap.
 
 ## ⟳ DRIFT — found 2026-06-13, REBUILT + render-verified 2026-06-15
 
