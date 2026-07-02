@@ -70,6 +70,7 @@ Real renders from the stack — the SFW sample set the benchmark rows point at (
 | 🦎 Shapeshifter | [masked edit](benchmarks/samples/shapeshifter/output_00001.mp4) | region-edit coherence |
 | 🪶 Silkmotion | [60fps clip](benchmarks/samples/silkmotion/output_00001.mp4) | interpolation smoothness |
 | 🎥 Wan 2.2 I2V / T2V | [i2v](benchmarks/samples/wan22-i2v/regression_seed42_20260528.mp4) · [t2v](benchmarks/samples/wan22-t2v/output_00001.mp4) | two-sampler MoE motion |
+| ✏️ Quickdraw | [draft t2v](benchmarks/samples/quickdraw/quickdraw_00001.mp4) | fast prompt-only draft — Wan 2.1 1.3B low-res preview (seed 42) |
 
 **Full pipeline** — keyframe → Wan I2V → ACE-Step score → mux
 
