@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Logs
+*.log
+
+# Editor / AI backup copies — keep these out of the public repo
+*.bak
+*.bak-*
+
+# OS cruft
+.DS_Store
+Thumbs.db

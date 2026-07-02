@@ -39,14 +39,57 @@ Workflow JSONs are in [workflows/](workflows/) — importable directly into Comf
 
 ## Honest status: is this client-grade?
 
-**Being measured, not assumed.** The pipelines produce output end-to-end (Vanisher confirmed on real lab footage). Whether the output survives a paying client's scrutiny at 4K is the open question — three reference jobs (object removal on handheld footage, avatar ad-read, dubbed clip) are being scored against fixed criteria, and results land in [benchmarks/](benchmarks/) pass or fail. The benchmark table ships with empty cells on purpose: they fill in public, weekly.
+**Being measured, not assumed.** The pipelines produce output end-to-end (Vanisher confirmed on real lab footage). Whether the output survives a paying client's scrutiny at 4K is the open question — three reference jobs (object removal on handheld footage, avatar ad-read, dubbed clip) are being scored against fixed criteria, and results land in [benchmarks/](benchmarks/) pass or fail. The benchmark table ships with empty cells on purpose: they fill in public, weekly. Real SFW sample renders are now attached per workflow — see **[See the output](#see-the-output)** below.
+
+## See the output
+
+Real renders from the stack — the SFW sample set the benchmark rows point at (the `sample_output` column in [`benchmarks/benchmarks.csv`](benchmarks/benchmarks.csv) links each measured row to its file). Stills preview inline on GitHub; click any video to play or download it.
+
+<p align="center">
+  <img src="benchmarks/samples/qwenimage/commercial_keyframe_00003_.png" width="32%" alt="QwenImage commercial-safe keyframe">
+  <img src="benchmarks/samples/goldsmith/output_00004_.png" width="32%" alt="Goldsmith 20-step keyframe">
+  <img src="benchmarks/samples/flashfire/output_00003_.png" width="32%" alt="Flashfire 4-step fast image">
+</p>
+
+**Stills — generation & keyframes**
+
+| Workflow | Sample | Look for |
+|---|---|---|
+| ⚡ Flashfire | [png](benchmarks/samples/flashfire/output_00003_.png) · [png](benchmarks/samples/flashfire/output_00002_.png) | 4-step distilled speed |
+| 🔨 Goldsmith | [png](benchmarks/samples/goldsmith/output_00004_.png) · [png](benchmarks/samples/goldsmith/output_00002_.png) | 20-step keyframe fidelity |
+| 🎨 QwenImage *(commercial hero, Apache-2.0)* | [png](benchmarks/samples/qwenimage/commercial_keyframe_00003_.png) · [png](benchmarks/samples/qwenimage/commercial_keyframe_00008_.png) | prompt adherence, product realism |
+| 🖼️ FluxCommercial | [png](benchmarks/samples/fluxcommercial/output_00001_.png) | fast draft *(FLUX.1-dev — non-commercial licence)* |
+| 🎞️ dreamforge / quickening / sharpscale | [t2v](benchmarks/samples/dreamforge/dreamforge_f0.png) · [i2v](benchmarks/samples/quickening/quickening_f0.png) · [1080p SR](benchmarks/samples/sharpscale/sharpscale_f8.png) | Hunyuan frames + true 1080p upscale |
+
+**Motion & finishing — video**
+
+| Workflow | Sample | Look for |
+|---|---|---|
+| 💎 Crystalforge | [1080p upscale](benchmarks/samples/crystalforge/e1b_00001.mp4) · [**true 4K · 3744×2160**](benchmarks/samples/crystalforge/crystalforge4k_output_00002.mp4) | detail recovery, no artifacts |
+| 🫥 Vanisher | [object removal](benchmarks/samples/vanisher/void-e1d-kitchen_00001_.mp4) | clean fill, no ghost (E1d clean pass). ⚠️ the earlier **E1 attempt failed** — ghost artifact + half-res + truncated; named honestly in the [benchmark notes](benchmarks/benchmarks.csv), not shown here |
+| 🦎 Shapeshifter | [masked edit](benchmarks/samples/shapeshifter/output_00001.mp4) | region-edit coherence |
+| 🪶 Silkmotion | [60fps clip](benchmarks/samples/silkmotion/output_00001.mp4) | interpolation smoothness |
+| 🎥 Wan 2.2 I2V / T2V | [i2v](benchmarks/samples/wan22-i2v/regression_seed42_20260528.mp4) · [t2v](benchmarks/samples/wan22-t2v/output_00001.mp4) | two-sampler MoE motion |
+
+**Full pipeline** — keyframe → Wan I2V → ACE-Step score → mux
+
+| Workflow | Sample | Look for |
+|---|---|---|
+| 🎬 maestro | [pipeline + score](benchmarks/samples/maestro/maestro_s42_final.mp4) · [keyframe](benchmarks/samples/maestro/maestro_keyframe_00015_.png) | end-to-end look + muxed music |
+| 🌅 Daybreak | [pipeline clip](benchmarks/samples/daybreak/final_video_00001.mp4) | brief → keyframe → video (fast, no score) |
+| 🏷️ CRE-2 Commercial | [final](benchmarks/samples/cre2-commercial/commercial_s42_final.mp4) | commercial-safe full pipeline |
+| ⛓️ CRE-3 Long clip | [10s chain](benchmarks/samples/cre3-longclip/maestro_chained.mp4) | inter-segment drift — the honest limit |
+| 🙂 FaceForward | [i2v](benchmarks/samples/faceforward/cre4_i2v_ff-ON_klein_seed42.mp4) | frontal framing survives I2V |
+
+> The **KeyframeAB (Chroma vs Lustify)** benchmark row keeps its measured numbers but ships no sample clip on purpose: its comparand uses an NSFW-capable checkpoint (Lustify) that stays local by policy. Every published sample above is SFW.
 
 ## Repo layout
 
 ```
-docs/        full spec (public edition) + problems-and-solutions glossary
-workflows/   the six named workflows as importable ComfyUI JSON
-benchmarks/  measurement template + render-benchmarks.py
+docs/              full spec (public edition) + problems-and-solutions glossary
+workflows/         the six named workflows as importable ComfyUI JSON
+benchmarks/        measurement template + render-benchmarks.py
+benchmarks/samples/  real SFW renders per workflow (linked from the CSV)
 ```
 
 Hardware: RTX 5090 32GB · Ryzen 9 9900X3D · 128GB DDR5 · Ubuntu 24.04 · CUDA 13.2.
