@@ -160,25 +160,43 @@ intentionally **not** in this repo's `workflows/`. This entry is the canonical
 record of the retirement; the monthly workflow-maintenance drift check should treat
 them as `retired` (not `drift`) so the report stops flagging them as an open rebuild.
 
-## ⟳ Monthly drift check — 2026-07-08 (0 rebuilt, 5 flagged, all non-rebuildable)
+## ⟳ Monthly drift check — 2026-07-08 (0 rebuilt, 5 flagged; 3D lane REGRESSION found + FIXED same day)
 
-Automated monthly drift-rebuild run. Validator flagged **5** workflows; on
-inspection **none were safely rebuildable**, so — per the brand rule (never commit
-an unverified/unrendered "fix") — **0 were rebuilt and no benchmark was recorded**.
-The 5 split into two classes, neither a graph-edit rebuild:
+Automated monthly drift-rebuild run. Validator flagged **5** workflows; none was a
+graph-edit rebuild, so — per the brand rule — **no workflow JSON was touched and no
+workflow benchmark recorded**. But the follow-up investigation (same day, owner
+present) found the 3 × 3D flags were a **real container regression**, root-caused
+and fixed:
 
-- **3 × 3D texture-paint graphs** (`3d-gilder`, `3d-glazier`, `3d-q-2mv`) — missing the
-  *entire* Hunyuan3D-Wrapper pack (`Hy3D*`, `DownloadAndLoadHy3D*`, `CV2InpaintTexture`)
-  **and** the ComfyUI-essentials `+`-nodes (`ImageResize+`, `ImageRemoveBackground+`,
-  `MaskPreview+`, `TransparentBGSession+`, `BatchCount+`). The live `:8188` registry
-  carries only core's *native* `Hunyuan3Dv2*`/`VAEDecodeHunyuan3D` — a different node
-  set. This is an **uninstalled custom-node pack, not drift**: these are 3D-foundry
-  workflows that belong to the **3D stack's own ComfyUI** (td-* :9101-9103), not
-  creative-comfyui. They validate here only because they share the workflows dir.
-  **Action for the human:** either install `ComfyUI-Hunyuan3DWrapper` + `ComfyUI-essentials`
-  in creative-comfyui if they are meant to run here, or move `3d-*.json` out of the
-  creative workflows dir / add a `3d-*` skip so the creative drift check stops
-  cross-flagging them. Not auto-actioned (cross-stack; the 3D stack owns that config).
+- **3 × 3D texture-paint graphs** (`3d-gilder`, `3d-glazier`, `3d-q-2mv`) —
+  **CORRECTION of this run's first diagnosis** (which read them as another stack's
+  workflows cross-flagging; wrong — the 3D Lane-Q *deliberately* installs into
+  creative-comfyui, see `3d-stack/comfyui-3d/install_into_comfyui.sh`). Real root
+  cause, a **three-layer ephemeral-state regression**: (1) F14b's 07-03 fix
+  (trimesh + transformers floor) was made "durable" in `start.sh` — but `start.sh`
+  is **`COPY`'d into the image at build time**, and the image dated from 06-15, so
+  the fix only ever lived in the then-running container's live pip state; (2) the
+  **07-07 container recreation** (driver/toolkit recovery) rebooted from the stale
+  June-15 image → `No module named 'trimesh'` → Hunyuan3DWrapper + MVAdapter
+  IMPORT FAILED → every `Hy3D*` node vanished from `/object_info`; the compiled
+  `custom_rasterizer` (also live-state only) vanished too; (3) the recreation used
+  the base compose alone, silently dropping the P4 override's `/models3d` +
+  diffusers RW mounts. Separately, `ComfyUI_essentials` (the `+` nodes) had **never**
+  been installed (F56 already knew: gilder.json "unrunnable as authored").
+  **FIX (all baked, recreation-proof now):** deps restored + `ComfyUI_essentials`
+  installed; **Dockerfile** bakes the 3D deps + essentials deps + a prebuilt
+  sm_120 `custom_rasterizer` wheel (`wheels/`, same anti-pip-rot pattern the
+  Dockerfile already used for SAM3/SeedVR2 on 06-13); the stale
+  `transformers==4.49.0` boot-pin removed from `start.sh` (would now *downgrade*
+  the working 5.9/0.39 resolver state); P4 mounts **merged into the base compose**
+  so a plain `up -d` is always complete. Image rebuilt, container recreated from
+  it, and **survival verified on the fresh container**: all deps import from the
+  image, 32 Hy3D + 84 `+` nodes registered, validator **25 ok / 0 drift / 0 error**,
+  and a **render-proof smoke test** ran the F56 shape graph end-to-end →
+  `shape_00002_.glb` (32.5 MB, 903k verts / 1.8M faces, volume > 0, ~80 s incl.
+  cold load — consistent with F56's calibration). Mesh-level proof only; the
+  textured/paint chain wasn't re-run (F56's e2e stands). VRAM freed after
+  (`/free`, back to 844 MiB idle).
 
 - **2 × in-graph-LLM cinematic graphs** (`t4b-video-with-music`, `t5-full-cinematic-nsfw`)
   — each embeds 2× `LLMRequest` nodes: exactly the in-graph-LLM pattern **retired**
@@ -190,8 +208,11 @@ The 5 split into two classes, neither a graph-edit rebuild:
   excluded them. **Fixed this run:** added both to the validator's skip-list (with a
   comment pointing here); re-run now reports **22 ok / 3 drift (the 3D graphs) / 0 error**.
 
-GPU etiquette: ran read-only against the already-running `creative-comfyui` (29.7 GB
-free at start, no foreign vllm/nemotron tenant); started nothing, stopped nothing.
+GPU etiquette: the detection run was read-only against the already-running
+`creative-comfyui` (29.7 GB free, no foreign vllm/nemotron tenant). The fix
+session (owner present, approved) restarted + recreated creative-comfyui with an
+empty queue, ran one ~80 s smoke render, then `/free`'d the loaded models —
+card back to the 844 MiB idle baseline.
 
 ## ⬜ Defined but not built / parked
 
