@@ -160,6 +160,39 @@ intentionally **not** in this repo's `workflows/`. This entry is the canonical
 record of the retirement; the monthly workflow-maintenance drift check should treat
 them as `retired` (not `drift`) so the report stops flagging them as an open rebuild.
 
+## ⟳ Monthly drift check — 2026-07-08 (0 rebuilt, 5 flagged, all non-rebuildable)
+
+Automated monthly drift-rebuild run. Validator flagged **5** workflows; on
+inspection **none were safely rebuildable**, so — per the brand rule (never commit
+an unverified/unrendered "fix") — **0 were rebuilt and no benchmark was recorded**.
+The 5 split into two classes, neither a graph-edit rebuild:
+
+- **3 × 3D texture-paint graphs** (`3d-gilder`, `3d-glazier`, `3d-q-2mv`) — missing the
+  *entire* Hunyuan3D-Wrapper pack (`Hy3D*`, `DownloadAndLoadHy3D*`, `CV2InpaintTexture`)
+  **and** the ComfyUI-essentials `+`-nodes (`ImageResize+`, `ImageRemoveBackground+`,
+  `MaskPreview+`, `TransparentBGSession+`, `BatchCount+`). The live `:8188` registry
+  carries only core's *native* `Hunyuan3Dv2*`/`VAEDecodeHunyuan3D` — a different node
+  set. This is an **uninstalled custom-node pack, not drift**: these are 3D-foundry
+  workflows that belong to the **3D stack's own ComfyUI** (td-* :9101-9103), not
+  creative-comfyui. They validate here only because they share the workflows dir.
+  **Action for the human:** either install `ComfyUI-Hunyuan3DWrapper` + `ComfyUI-essentials`
+  in creative-comfyui if they are meant to run here, or move `3d-*.json` out of the
+  creative workflows dir / add a `3d-*` skip so the creative drift check stops
+  cross-flagging them. Not auto-actioned (cross-stack; the 3D stack owns that config).
+
+- **2 × in-graph-LLM cinematic graphs** (`t4b-video-with-music`, `t5-full-cinematic-nsfw`)
+  — each embeds 2× `LLMRequest` nodes: exactly the in-graph-LLM pattern **retired**
+  above (superseded by the host-side Maestro orchestrator, render-verified). No drop-in
+  replacement exists and re-adding an in-graph LLM re-introduces the network-isolation
+  problem that got them retired; `t5-*-nsfw` is Tier-5 (never public) besides. Per the
+  §Retired directive ("the drift check should treat them as retired, not drift"), the
+  root cause of them re-flagging every month was that `workflow-validate.py` never
+  excluded them. **Fixed this run:** added both to the validator's skip-list (with a
+  comment pointing here); re-run now reports **22 ok / 3 drift (the 3D graphs) / 0 error**.
+
+GPU etiquette: ran read-only against the already-running `creative-comfyui` (29.7 GB
+free at start, no foreign vllm/nemotron tenant); started nothing, stopped nothing.
+
 ## ⬜ Defined but not built / parked
 
 - **RTX VSR** — fast preview upscaler, not yet installed (calibrate vs SeedVR2)

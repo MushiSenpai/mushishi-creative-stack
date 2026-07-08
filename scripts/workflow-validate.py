@@ -32,8 +32,14 @@ def main():
     results = {}
     for path in sorted(glob.glob(f"{WF_DIR}/*.json")):
         name = os.path.basename(path).replace(".json", "")
-        if name.startswith("_") or name in ("void", "crystalforge", "void-e1c", "void-e1b", "t45-void-vanisher-e1b", "t6-crystalforge-e1b"):
-            continue  # skip API-exports + scratch variants
+        # Retired in-graph-LLM cinematic graphs — superseded by the host-side Maestro
+        # orchestrator (see COVERAGE.md §Retired, 2026-06-22). They embed an LLMRequest
+        # node that will never validate against current nodes and are intentionally NOT
+        # rebuilt (network-isolation + reasoning-contract + fragility reasons). Excluded
+        # so the monthly drift check stops false-flagging them as open rebuild work.
+        RETIRED = ("t4b-video-with-music", "t5-full-cinematic-nsfw")
+        if name.startswith("_") or name in RETIRED or name in ("void", "crystalforge", "void-e1c", "void-e1b", "t45-void-vanisher-e1b", "t6-crystalforge-e1b"):
+            continue  # skip API-exports + scratch variants + retired graphs
         try:
             wf_types = workflow_node_types(path)
             missing = sorted(wf_types - live)
